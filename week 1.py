@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 
 # 設置隨機種子以確保結果可重現
 np.random.seed(0)
@@ -13,6 +14,9 @@ for i in range(10):
 
 # 創建圖表，每張圖佔一行，兩欄（左：彩色，右：灰階）
 fig, axes = plt.subplots(nrows=2, ncols=10, figsize=(15, 3))
+
+# 用來存放每張圖的統計結果
+stats_list = []
 
 for i, color_image in enumerate(images):
     # 灰階影像（取 RGB 平均）
@@ -28,30 +32,23 @@ for i, color_image in enumerate(images):
     axes[1, i].set_title(f'Gray Image {i+1}')
     axes[1, i].axis('off')
 
-print("Mean:",np.mean(images))
-print("Max",np.max(images))
-print("Min",np.min(images))
-print("Std:",np.std(images))
+    # 計算統計數據（用灰階圖）
+    max_val = np.max(gray_image)
+    min_val = np.min(gray_image)
+    mean_val = np.mean(gray_image)
+    std_val = np.std(gray_image)
 
-# 生成線性數列
-sequence_1 = np.linspace(1, 3, 10)
-
-# 建立字典資料
-d = {'s1': sequence_1}
+    # 保存到列表
+    stats_list.append([i+1, max_val, min_val, mean_val, std_val])
 
 # 建立 DataFrame
-df = pd.DataFrame(data=d)
-
-# 加入統計列
-stats = pd.DataFrame({
-    's1': [np.max(df['s1']), np.min(df['s1']), np.mean(df['s1']), np.std(df['s1'])]
-}, index=['Max', 'Min', 'Mean', 'Std'])
-
-# 把原始資料與統計數據合併（index 要重設）
-df_combined = pd.concat([df, stats])
+df_stats = pd.DataFrame(stats_list, columns=['圖片編號', '最大值', '最小值', '平均值', '標準差'])
 
 # 輸出到 Excel
-df_combined.to_excel('test.xlsx')
+output_path = os.path.join(os.getcwd(), 'test''.xlsx')
+df_stats.to_excel(output_path, index=False)
+
+print("Excel 檔案已輸出:", output_path)
 
 plt.tight_layout()
 plt.show()
